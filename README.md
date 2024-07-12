@@ -1,5 +1,7 @@
 # Happiness Index API
 
+This is a toy-size example attempting to build a very simple API in Go
+
 ### To Start
 
 #### Prerequisite
@@ -33,7 +35,11 @@ Currently, only `county` facet is available.
 #### GET /happiness/{facet}/{id}; get happiness index by facet id
 
 ```
-$ curl localhost:5000/happiness/county/9999
+curl localhost:5000/happiness/county/9999
+```
+
+```
+Example Response
 {
     "data": {
         "facet": "county",
@@ -51,6 +57,10 @@ $ curl localhost:5000/happiness/county/9999
 
 ```
 curl -X POST -d '{"counties":["9999","1001"], "metrics": ["average","max"]}' localhost:5000/happiness/county
+```
+
+```
+Example Response
 {
     "data": {
         "facet": "county",

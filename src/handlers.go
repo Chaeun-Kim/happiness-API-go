@@ -1,13 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/montanaflynn/stats"
 	"lightcast/happiness/constants"
 	"lightcast/happiness/model"
-	"log/slog"
 	"net/http"
-	"fmt"
 )
 
 func PingHandler() gin.HandlerFunc {
@@ -58,35 +56,4 @@ func HappinessByFacetIdsHandler(data model.HappinessIndexMap) gin.HandlerFunc {
 
 		c.IndentedJSON(http.StatusOK, model.NewHappinessByFacetIdsResponse(*index_data))
 	}
-}
-
-func ComputeMetrics(data []model.IndexMapping, metrics []string) ([]model.MetricMapping, error) {
-	values := make([]float64, len(data))
-	for i, item := range data {
-		values[i] = item.Value
-	}
-
-	metricFuncs := map[string]func(stats.Float64Data) (float64, error){
-		constants.AVERAGE_METRIC: stats.Mean,
-		constants.MEDIAN_METRIC:  stats.Median,
-		constants.P25_METRIC:     func(values stats.Float64Data) (float64, error) { return stats.Percentile(values, 25.0) },
-		constants.P75_METRIC:     func(values stats.Float64Data) (float64, error) { return stats.Percentile(values, 75.0) },
-		constants.MIN_METRIC:     stats.Min,
-		constants.MAX_METRIC:     stats.Max,
-		constants.STDDEV_METRIC:  stats.StandardDeviation,
-	}
-
-	metricMappings := []model.MetricMapping{}
-	for _, metric := range metrics {
-		if computeFunc, exists := metricFuncs[metric]; exists {
-			metricValue, err := computeFunc(values)
-			if err != nil {
-				slog.Error("Failed to produce metric %v", err)
-				return nil, fmt.Errorf("Failed to calculate metric '%s'", metric)
-			}
-			metricMappings = append(metricMappings, model.MetricMapping{Name: metric, Value: metricValue})
-		}
-	}
-
-	return metricMappings, nil
 }
